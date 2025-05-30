@@ -9,10 +9,14 @@ let firstFrameSent = false;
 let frameLoopId = null;
 let poseLoopId = null;
 
-async function StartPoseTracking() {
+// Step 1: Send available cameras to Unity
+
+// Step 2: Called by Unity to start tracking
+async function StartTracking() {
     cancelLoops();
     await setupCamera();
     startFrameLoop();
+
 
 }
 
@@ -88,7 +92,6 @@ function startFrameLoop() {
     sendFrame();
 }
 
-
 // Cancel any running frame or pose loop
 function cancelLoops() {
     if (frameLoopId) cancelAnimationFrame(frameLoopId);
@@ -98,9 +101,8 @@ function cancelLoops() {
 // Unity registration
 function RegisterUnityInstance(instance) {
     unityInstance = instance;
-    StartPoseTracking();
+    StartTracking();
 }
 
 // Expose to global
 window.RegisterUnityInstance = RegisterUnityInstance;
-window.StartPoseTracking = StartPoseTracking;
