@@ -90,23 +90,23 @@
         loadingBar.style.display = "block";
 
         const unityLoader = document.createElement("script");
-        unityLoader.src = loaderUrl;
-        unityLoader.onload = () => {
-            createUnityInstance(canvas, config, (progress) => {
-                progressBarFull.style.width = `${progress * 100}%`;
-            }).then((unityInstance) => {
-                window.unityInstance = unityInstance;
-                RegisterUnityInstance(unityInstance);
-                loadingBar.style.display = "none";
-                fullscreenButton.onclick = () => unityInstance.SetFullscreen(1);
+unityLoader.src = loaderUrl;
+unityLoader.onload = () => {
+    createUnityInstance(canvas, config, (progress) => {
+        progressBarFull.style.width = `${progress * 100}%`;
+    }).then((unityInstance) => {
+        window.unityInstance = unityInstance;
+        RegisterUnityInstance(unityInstance);
+        loadingBar.style.display = "none";
+        fullscreenButton.onclick = () => unityInstance.SetFullscreen(1);
 
-                //  Load pose tracker
-            }).catch((message) => alert(message));
-        }
+        //  Load pose tracker
+    }).catch((message) => alert(message));
+}
 
-            ;
+    ;
 
-        document.body.appendChild(unityLoader);
+document.body.appendChild(unityLoader);
     </script>
 
 
