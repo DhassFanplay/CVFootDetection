@@ -2,7 +2,7 @@
 <html lang="en-us">
 <head>
   <meta charset="utf-8" />
-  <title>WebGLFootBall</title>
+  <title>WebGLFootBall AR</title>
   <meta
     name="viewport"
     content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no"
@@ -11,40 +11,46 @@
     body { margin:0; padding:0; overflow:hidden; background:#000; }
     #unity-container { position:relative; width:100vw; height:100vh; }
     #unity-canvas { width:100%; height:100%; background:#000; display:block; }
-    /* visible camera preview in top-left corner */
+    /* video sits *under* Unity so Unity content draws on top */
     #video {
-      position:absolute; top:10px; left:10px;
-      width:240px; height:auto; z-index:1000;
-      border:2px solid #09f; border-radius:4px;
+      position:absolute; top:0; left:0;
+      width:100vw; height:100vh;
+      object-fit:cover;
+      z-index:0;
+    }
+    /* Unity canvas sits above */
+    #unity-canvas { position:absolute; top:0; left:0; z-index:1; }
+    /* UI on top of everything */
+    #captureButton, #status {
+      position:absolute; z-index:2;
+      color:#fff; font-family:sans-serif;
     }
     #captureButton {
-      position:absolute; bottom:30px; left:50%;
-      transform:translateX(-50%);
-      z-index:1000; padding:12px 24px;
-      font-size:18px; background:#00aaff;
-      border:none; border-radius:6px; color:#fff;
-      cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);
+      bottom:30px; left:50%; transform:translateX(-50%);
+      padding:12px 24px; background:#00aaff; border:none;
+      border-radius:6px; cursor:pointer; font-size:18px;
     }
     #status {
-      position:absolute; top:20px; right:20px;
-      z-index:1000; padding:8px 12px;
-      background:rgba(0,0,0,0.6); color:#fff;
-      border-radius:4px; font-size:14px;
+      top:20px; right:20px; padding:8px 12px;
+      background:rgba(0,0,0,0.6); border-radius:4px;
+      font-size:14px;
     }
   </style>
 </head>
 <body>
-  <!-- Unity canvas -->
+  <!-- camera preview UNDER the Unity canvas -->
+  <video id="video" autoplay muted playsinline></video>
+
+  <!-- Unity WebGL -->
   <div id="unity-container">
     <canvas id="unity-canvas"></canvas>
   </div>
 
-  <!-- Page UI + preview -->
-  <video id="video" autoplay muted playsinline></video>
+  <!-- UI on top -->
   <button id="captureButton">Capture Foot</button>
   <div id="status">Waiting…</div>
 
-  <!-- OpenCV and your script -->
+  <!-- OpenCV.js + app JS -->
   <script async src="https://docs.opencv.org/4.9.0/opencv.js"></script>
   <script type="module" src="OnlyOpenCV.js"></script>
 
@@ -53,12 +59,12 @@
     const buildUrl  = "Build",
           loaderUrl = buildUrl + "/CVFootDetection.loader.js",
           config    = {
-            dataUrl:        buildUrl + "/CVFootDetection.data",
-            frameworkUrl:   buildUrl + "/CVFootDetection.framework.js",
-            codeUrl:        buildUrl + "/CVFootDetection.wasm",
+            dataUrl:      buildUrl + "/CVFootDetection.data",
+            frameworkUrl: buildUrl + "/CVFootDetection.framework.js",
+            codeUrl:      buildUrl + "/CVFootDetection.wasm",
             streamingAssetsUrl: "StreamingAssets",
-            companyName:    "DefaultCompany",
-            productName:    "WebGLFootBall",
+            companyName:  "DefaultCompany",
+            productName:  "WebGLFootBall",
             productVersion: "0.1"
           };
 
@@ -68,9 +74,9 @@
       createUnityInstance(
         document.querySelector("#unity-canvas"),
         config,
-        p => document.querySelector("#unity-container .progress")?.style.width = `${p*100}%`
+        prog => {/* could show a progress bar */}
       ).then(ui => window.unityInstance = ui)
-       .catch(alert);
+       .catch(err => alert(err));
     };
     document.body.append(s);
   </script>
