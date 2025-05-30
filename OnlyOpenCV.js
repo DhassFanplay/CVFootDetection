@@ -55,7 +55,8 @@ function captureTemplate() {
 
 function sendFootPositionToUnity(x, y) {
     if (typeof unityInstance !== 'undefined' && unityInstance.SendMessage) {
-        unityInstance.SendMessage("FootCube", "OnFootDetected", `${x},${y}`);
+        const json = JSON.stringify({ x: x, y: y });
+        unityInstance.SendMessage("FootCube", "OnFootDetected", json);
     }
 }
 
