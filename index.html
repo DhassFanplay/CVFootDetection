@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8" />
+    <title>Unity WebGL Player | WebGLFootBall</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+</head>
+
+<body style="margin:0; padding:0; overflow:hidden; background:#000; font-family:sans-serif;">
+
+    <!-- Hidden video/canvas for OpenCV -->
+    <video id="video" autoplay muted playsinline style="display:none; visibility:hidden; position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></video>
+    <canvas id="hiddenCanvas" style="display:none; visibility:hidden; position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;"></canvas>
+
+    <!-- Status and Button (also hidden visually) -->
+    <div id="status" style="display:none; visibility:hidden; position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">Waiting...</div>
+    <button id="captureButton">Capture Foot</button>
+
+    <!-- Unity WebGL Player UI -->
+    <div id="unity-container" class="unity-desktop" style="width:100vw; height:100vh; position:relative; overflow:hidden;">
+        <canvas id="unity-canvas" width="960" height="600" tabindex="-1" style="width:100%; height:100%; display:block; background:#000;"></canvas>
+
+        <div id="unity-loading-bar" style="width:100%; height:4px; background:#444; position:absolute; bottom:0; left:0; display:block;">
+            <div id="unity-progress-bar-empty" style="width:100%; height:100%; background:#444;">
+                <div id="unity-progress-bar-full" style="width:0%; height:100%; background:#09f;"></div>
+            </div>
+        </div>
+
+        <div id="unity-warning" style="position:absolute; top:10px; left:10px; z-index:999; display:none;"></div>
+
+        <div id="unity-footer" style="position:absolute; bottom:10px; left:10px; display:flex; align-items:center; gap:10px; color:white;">
+            <!--<div id="unity-webgl-logo" style="width:24px; height:24px; background:url('TemplateData/unity-webgl-logo.png') no-repeat center/contain;"></div>-->
+            <div id="unity-fullscreen-button" style="padding:5px 10px; background:#222; color:white; border:1px solid #555; border-radius:4px; cursor:pointer;">Fullscreen</div>
+            <div id="unity-build-title" style="margin-left:10px;">WebGLFootBall</div>
+        </div>
+    </div>
+
+    <!-- OpenCV -->
+    <script async src="https://docs.opencv.org/4.9.0/opencv.js"></script>
+    <script type="module" src="OnlyOpenCV.js"></script>
+
+    <!-- Unity Loader -->
+    <script>
+        const container = document.querySelector("#unity-container");
+        const canvas = document.querySelector("#unity-canvas");
+        const loadingBar = document.querySelector("#unity-loading-bar");
+        const progressBarFull = document.querySelector("#unity-progress-bar-full");
+        const fullscreenButton = document.querySelector("#unity-fullscreen-button");
+        const warningBanner = document.querySelector("#unity-warning");
+
+        function unityShowBanner(msg, type) {
+            const div = document.createElement("div");
+            div.innerHTML = msg;
+            if (type === "error") div.style = "background: red; padding: 10px;";
+            else if (type === "warning") {
+                div.style = "background: yellow; padding: 10px;";
+                setTimeout(() => {
+                    warningBanner.removeChild(div);
+                    warningBanner.style.display = warningBanner.children.length ? "block" : "none";
+                }, 5000);
+            }
+            warningBanner.appendChild(div);
+            warningBanner.style.display = warningBanner.children.length ? "block" : "none";
+        }
+
+        const buildUrl = "Build";
+        const loaderUrl = buildUrl + "/CVFootDetection.loader.js";
+        const config = {
+            dataUrl: buildUrl + "/CVFootDetection.data",
+            frameworkUrl: buildUrl + "/CVFootDetection.framework.js",
+            codeUrl: buildUrl + "/CVFootDetection.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "DefaultCompany",
+            productName: "WebGLFootBall",
+            productVersion: "0.1",
+            showBanner: unityShowBanner
+        };
+
+        const meta = document.createElement("meta");
+        meta.name = "viewport";
+        meta.content = "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no";
+        document.head.appendChild(meta);
+
+        container.className = "unity-mobile";
+
+        const unityLoader = document.createElement("script");
+        unityLoader.src = loaderUrl;
+        unityLoader.onload = () => {
+            createUnityInstance(canvas, config, (progress) => {
+                progressBarFull.style.width = `${progress * 100}%`;
+            }).then((unityInstance) => {
+                window.unityInstance = unityInstance;
+
+                loadingBar.style.display = "none";
+                fullscreenButton.onclick = () => unityInstance.SetFullscreen(1);
+
+                // You can add any other initialization here
+            }).catch((message) => alert(message));
+
+        };
+        document.body.appendChild(unityLoader);
+    </script>
+</body>
+</html>
