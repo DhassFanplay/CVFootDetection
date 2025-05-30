@@ -69,16 +69,31 @@
           };
 
     const s = document.createElement("script");
-    s.src = loaderUrl;
-    s.onload = () => {
-      createUnityInstance(
-        document.querySelector("#unity-canvas"),
-        config,
-        prog => {/* could show a progress bar */}
-      ).then(ui => window.unityInstance = ui)
-       .catch(err => alert(err));
-    };
-    document.body.append(s);
+s.src = loaderUrl;
+s.onload = () => {
+  createUnityInstance(
+    document.querySelector("#unity-canvas"),
+    config,
+    prog => {
+      // Optional: update your own progress UI here
+    }
+  )
+  .then(ui => {
+    // Instead of directly assigning unityInstance, hand it off to your register function:
+    if (typeof window.RegisterUnityInstance === "function") {
+      window.RegisterUnityInstance(ui);
+    } else {
+      // Fallback if not defined
+      window.unityInstance = ui;
+      console.warn("RegisterUnityInstance not found, assigned to window.unityInstance");
+    }
+  })
+  .catch(err => {
+    console.error("Unity failed to load:", err);
+    alert("Unity failed to load:\n" + err);
+  });
+};
+document.body.appendChild(s);
   </script>
 </body>
 </html>
